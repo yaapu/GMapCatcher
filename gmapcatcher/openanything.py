@@ -6,10 +6,12 @@ import gzip
 import mimetypes
 from StringIO import StringIO
 from mapConf import MapConf
+from fake_useragent import UserAgent
 
 conf = MapConf(None)
-USER_AGENT = '%s/%s +%s' % (conf.name, conf.version, conf.web_address)
 
+ua = UserAgent(cache=False)
+USER_AGENT = ua.random
 
 class SmartRedirectHandler(urllib2.HTTPRedirectHandler):
     def http_error_301(self, req, fp, code, msg, headers):

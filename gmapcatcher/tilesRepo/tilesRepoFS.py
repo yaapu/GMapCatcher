@@ -9,6 +9,7 @@
 
 
 import os
+import sys
 import gmapcatcher.lrucache as lrucache
 import gmapcatcher.fileUtils as fileUtils
 import gmapcatcher.widgets.mapPixbuf as mapPixbuf
@@ -17,7 +18,7 @@ from threading import Lock
 from gmapcatcher.mapConst import *
 from tilesRepo import TilesRepository
 from tilesRepoSQLite3 import tileNotInRepository
-
+from PIL import Image
 
 class TilesRepositoryFS(TilesRepository):
 
@@ -88,7 +89,17 @@ class TilesRepositoryFS(TilesRepository):
             file = open(filename, 'wb')
             file.write(data)
             file.close()
-
+            # creating a smaller 100x100 version
+            big_png = str(coord[1] % 1024) + ".png"
+            small_png = "s_" + big_png
+            small_filename = filename.replace(self.conf.get_layer_dir(layer),"100x100\\" + self.conf.get_layer_dir(layer)).replace(big_png,small_png)
+            small_path = small_filename.replace("\\"+small_png, "")
+            #sys.stdout.write("processing => " + small_filename + "\n")
+            if not os.path.isdir(small_path):
+                os.makedirs(small_path)
+            im = Image.open(filename)
+            im.thumbnail((100,100),Image.ANTIALIAS)
+            im.save(small_filename)
             return True
         except KeyboardInterrupt:
             raise

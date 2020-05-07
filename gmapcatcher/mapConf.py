@@ -188,7 +188,7 @@ class MapConf():
         ## Part of the URL that is used to get the google tiles
         self.google_src = read_config('google_src', '', str, SECTION_MAP)
         ## Maximum number of threads to download maps
-        self.maxthreads = read_config('maxthreads', 4, int, SECTION_MAP)
+        self.maxthreads = 1
         ## Time delay before drawing the map overlay
         self.overlay_delay = read_config('overlay_delay', 0.1, float, SECTION_MAP)
         ## Initial map opacity
