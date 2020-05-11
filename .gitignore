@@ -1,3 +1,4 @@
 *.pyc
 GMapCatcher*.exe
 .idea
+.vscode

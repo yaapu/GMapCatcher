@@ -18,7 +18,7 @@ from threading import Lock
 from gmapcatcher.mapConst import *
 from tilesRepo import TilesRepository
 from tilesRepoSQLite3 import tileNotInRepository
-from PIL import Image
+from PIL import Image, ImageOps
 
 class TilesRepositoryFS(TilesRepository):
 
@@ -63,6 +63,19 @@ class TilesRepositoryFS(TilesRepository):
                 pixbuf = self.missingPixbuf
         return pixbuf
 
+    def create_png_thumbnail(self, filename, coord, layer, width, height):
+        big_png = str(coord[1] % 1024) + ".png"
+        layer_path = self.conf.get_layer_dir(layer)
+        small_png = "s_" + big_png
+        small_filename = filename.replace(layer_path, os.path.join("100x100", layer_path)).replace(big_png, small_png)
+        small_path = small_filename.replace(os.sep + small_png, "")
+        #sys.stdout.write("processing => " + small_filename + "\n")
+        if not os.path.isdir(small_path):
+            os.makedirs(small_path)
+        im = Image.open(filename)
+        im.thumbnail((width,height),Image.BICUBIC)
+        im.save(small_filename)
+
     ## Get the png file for the given location
     #  Returns true if the file is successfully retrieved
     def get_png_file(self, coord, layer,
@@ -90,16 +103,7 @@ class TilesRepositoryFS(TilesRepository):
             file.write(data)
             file.close()
             # creating a smaller 100x100 version
-            big_png = str(coord[1] % 1024) + ".png"
-            small_png = "s_" + big_png
-            small_filename = filename.replace(self.conf.get_layer_dir(layer),"100x100\\" + self.conf.get_layer_dir(layer)).replace(big_png,small_png)
-            small_path = small_filename.replace("\\"+small_png, "")
-            #sys.stdout.write("processing => " + small_filename + "\n")
-            if not os.path.isdir(small_path):
-                os.makedirs(small_path)
-            im = Image.open(filename)
-            im.thumbnail((100,100),Image.ANTIALIAS)
-            im.save(small_filename)
+            self.create_png_thumbnail(filename, coord, layer, 100, 100)
             return True
         except KeyboardInterrupt:
             raise
